@@ -1,9 +1,9 @@
 package com.yp.spare.spareCostPrice.controller;
 
+import com.yp.spare.spareCostPrice.bean.QueryPageVo;
 import com.yp.spare.spareCostPrice.bean.SpareCostPrice;
 import com.yp.spare.spareCostPrice.bean.importSpare;
 import com.yp.spare.spareCostPrice.service.SpareCostPriceService;
-import com.yp.spare.utils.QueryPageVo;
 import com.yp.spare.utils.ResultBuildVo;
 import com.yp.spare.utils.ResultVo;
 import io.swagger.annotations.ApiOperation;
