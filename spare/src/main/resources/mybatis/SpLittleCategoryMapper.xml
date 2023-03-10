@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace即使不用到这个属性也不能为空 -->
+<mapper namespace = "com.yp.spare.spLittleCategory.mapper.SpLittleCategoryMapper">
+    <!--生成对应的map-->
+    <resultMap id = "SpLittleCategoryMap"
+               type = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        <id column = "category_number" property = "id"/>
+        <result column = "category_code" property = "code"/>
+        <result column = "category_name" property = "name"/>
+        <result column = "category_type" property = "status"/>
+        <result column = "category_remarks" property = "remark"/>
+        <result column = "category_addTime" property = "categoryAddTime"/>
+        <result column = "category_addMan" property = "categoryAddMan"/>
+        <result column = "category_updateTime" property = "categoryUpdateTime"/>
+        <result column = "category_updateMan" property = "categoryUpdateMan"/>
+        <result column = "category_version" property = "version"/>
+    </resultMap>
+
+    <insert id = "addSpLittleCategory"
+            parameterType = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        insert into sp_little_category(category_code, category_name, category_type, category_remarks,
+                                       category_addTime, category_addMan, category_updateTime, category_updateMan)
+        values (#{code}, #{name}, #{status}, #{remark}, #{categoryAddTime},
+                #{categoryAddMan}, #{categoryUpdateTime}, #{categoryUpdateMan})
+    </insert>
+    <insert id = "saveBatch" parameterType = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        insert into sp_little_category(category_code, category_name, category_type, category_remarks,
+        category_addTime, category_addMan, category_updateTime, category_updateMan)
+        values
+        <foreach collection = "list" item = "item" index = "index" separator = ",">
+            (#{item.code}, #{item.name}, #{item.status}, #{item.remark}, sysdate(),
+            'admin', sysdate(),'admin')
+        </foreach>
+    </insert>
+    <update id = "updateSpLittleCategory"
+            parameterType = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        update sp_little_category
+        <set>
+            <if test = "name != null and name != ''">
+                category_name = #{name},
+            </if>
+            <if test = "status != null">
+                category_type = #{status},
+            </if>
+            <if test = "remark != null and remark != ''">
+                category_remarks = #{remark},
+            </if>
+            category_updateTime = sysdate(),category_updateMan = #{categoryUpdateMan},category_version =
+            category_version + 1
+        </set>
+        where category_number = #{id}
+    </update>
+
+    <update id = "updateSpLittleCategoryByEnable"
+            parameterType = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        update sp_little_category
+        <set>
+            <if test = "status != null">
+                category_type = #{status},
+            </if>
+            <if test = "categoryUpdateMan != null">
+                category_updateMan = #{categoryUpdateMan},
+            </if>
+            category_updateTime = sysdate(),category_version = category_version + 1
+        </set>
+        where category_number = #{id}
+    </update>
+
+    <select id = "getSpLittleCategoryByCode" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_little_category
+        where category_code = #{code}
+    </select>
+
+    <select id = "getSpLittleCategoryByName" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_little_category
+        where category_name = #{name}
+    </select>
+
+    <select id = "selectAll" resultType = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        select *
+        from sp_little_category
+    </select>
+
+    <select id = "getSpLittleCategoryByNameAndId" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_little_category
+        where category_name = #{name}
+          and category_number != #{id}
+    </select>
+
+    <select id = "getSpLittleCategoryById"
+            resultType = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        select *
+        from sp_little_category
+        where category_number = #{id}
+    </select>
+
+    <select id = "queryCount" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_little_category
+        <where>
+            <if test = "name != null and name != ''">
+                and category_name like concat('%',#{name},'%')
+            </if>
+            <if test = "status != null">
+                and category_type = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id = "queryPage" resultMap = "SpLittleCategoryMap">
+        select *
+        from sp_little_category
+        <where>
+            <if test = "name != null and name != ''">
+                and category_name like concat('%',#{name},'%')
+            </if>
+            <if test = "code != null and code != ''">
+                and category_code like concat('%',#{code},'%')
+            </if>
+            <if test = "status != null">
+                and category_type = #{status}
+            </if>
+        </where>
+        order by category_addTime desc
+        limit #{offSize},#{pageSize}
+    </select>
+    <select id = "queryAll" resultMap = "SpLittleCategoryMap">
+        select *
+        from sp_little_category
+        where category_type = 1
+    </select>
+    <select id = "queryLittleCount" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_little_category
+        where category_type = 1
+    </select>
+    <select id = "selectCodeList" resultType = "java.lang.String">
+        select category_code
+        from sp_little_category where
+        <foreach collection = "codeCountList" item = "code" index = "index" separator = "or">
+            category_code = #{code}
+        </foreach>
+    </select>
+    <select id = "selectNameList" resultType = "java.lang.String">
+        select category_name
+        from sp_little_category where
+        <foreach collection = "nameCountList" item = "name" index = "index" separator = "or">
+            category_name = #{name}
+        </foreach>
+    </select>
+    <select id = "exportFile" resultType = "com.yp.spare.spLittleCategory.bean.SpLittleCategory">
+        select category_name as name,category_code as code,category_type as status,category_remarks as remark
+        from sp_little_category
+        <where>
+            <if test = "name != null and name != ''">
+                and category_name like concat('%',#{name},'%')
+            </if>
+            <if test = "code != null and code != ''">
+                and category_code like concat('%',#{code},'%')
+            </if>
+            <if test = "status != null">
+                and category_type = #{status}
+            </if>
+        </where>
+        order by category_addTime desc
+    </select>
+
+</mapper>

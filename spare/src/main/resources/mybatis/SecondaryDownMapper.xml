@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace即使不用到这个属性也不能为空 -->
+<mapper namespace = "com.yp.spare.secondarydown.mapper.SecondaryDownMapper">
+    <resultMap id = "DownMap" type = "com.yp.spare.secondarydown.bean.SecondaryDown">
+        <id column = "id" property = "id"/>
+        <result column = "dictionary_name" property = "dictionaryName"/>
+        <result column = "dictionary_code" property = "dictionaryCode"/>
+        <result column = "parent_code" property = "parentCode"/>
+        <result column = "status" property = "status"/>
+        <result column = "remark" property = "remark"/>
+    </resultMap>
+    <select id = "selectAll" resultMap = "DownMap">
+        select * from secondary_down
+        <where>
+            <if test = "dictionaryName != null and dictionaryName != ''">
+                and dictionary_name like concat('%', #{dictionaryName}, '%')
+            </if>
+            <if test = "dictionaryCode != null and dictionaryCode != ''">
+                and dictionary_code like concat('%', #{dictionaryCode}, '%')
+            </if>
+            <if test = "parentCode != null and parentCode != ''">
+                and parent_code like concat('%', #{parentCode}, '%')
+            </if>
+            <if test = "status != null and status != ''">
+                and status = #{status}
+            </if>
+            <if test = "remark != null and remark != ''">
+                and remark like concat('%', #{remark}, '%')
+            </if>
+        </where>
+    </select>
+    <select id = "selectSon" resultMap = "DownMap">
+        select *
+        from secondary_down
+        where parent_code = #{dictionaryCode}
+          and status = 1
+    </select>
+    <select id = "selectByDictionaryCode" resultMap = "DownMap">
+        select *
+        from secondary_down
+        where dictionary_code = #{dictionaryCode}
+    </select>
+    <select id = "selectByCode" resultType = "com.yp.spare.secondarydown.bean.SecondaryDown">
+        select *
+        from secondary_down
+        where dictionary_code = #{dictionaryCode}
+    </select>
+    <insert id = "addParent" parameterType = "com.yp.spare.secondarydown.bean.SecondaryDown">
+        insert into secondary_down
+            (dictionary_name, dictionary_code, status, remark)
+        values (#{dictionaryName}, #{dictionaryCode}, #{status}, #{remark})
+    </insert>
+    <insert id = "addSon" parameterType = "com.yp.spare.secondarydown.bean.SecondaryDown">
+        insert into secondary_down
+            (dictionary_name, dictionary_code, parent_code, status, remark)
+        values (#{dictionaryName}, #{dictionaryCode}, #{parentCode}, #{status}, #{remark})
+    </insert>
+    <update id = "disableParent">
+        update secondary_down
+        set status = 0
+        where parent_code = #{dictionaryCode}
+    </update>
+    <update id = "disableByParentCode">
+        update secondary_down
+        set status = 0
+        where dictionary_code = #{parentCode}
+    </update>
+    <update id = "disableBySelf">
+        update secondary_down
+        set status = 0
+        where dictionary_code = #{dictionaryCode}
+    </update>
+    <update id = "disableParentCode">
+        update secondary_down
+        set status = 0
+        where dictionary_code = #{parentCode}
+    </update>
+    <update id = "enableByParentCode">
+        update secondary_down
+        set status = 1
+        where dictionary_code = #{parentCode}
+    </update>
+    <update id = "enableParent">
+        update secondary_down
+        set status = 1
+        where parent_code = #{dictionaryCode}
+    </update>
+    <update id = "enable">
+        update secondary_down
+        set status = 1
+        where dictionary_code = #{dictionaryCode}
+    </update>
+    <update id = "enableSon">
+        update secondary_down
+        set status = 1
+        where dictionary_code = #{dictionaryCode}
+    </update>
+    <update id = "enableBySon">
+        update secondary_down
+        set status = 1
+        where dictionary_code = #{parentCode}
+    </update>
+
+
+</mapper>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace即使不用到这个属性也不能为空 -->
+<mapper namespace = "com.yp.spare.spBroadCategory.mapper.SpBroadCategoryMapper">
+    <!--生成对应的map-->
+    <resultMap id = "SpBroadCategoryMap" type = "com.yp.spare.spBroadCategory.bean.SpBroadCategory">
+        <id column = "category_number" property = "id"/>
+        <result column = "category_code" property = "code"/>
+        <result column = "category_name" property = "name"/>
+        <result column = "category_type" property = "status"/>
+        <result column = "category_remarks" property = "remark"/>
+        <result column = "category_addTime" property = "categoryAddTime"/>
+        <result column = "category_addMan" property = "categoryAddMan"/>
+        <result column = "category_updateTime" property = "categoryUpdateTime"/>
+        <result column = "category_updateMan" property = "categoryUpdateMan"/>
+        <result column = "category_version" property = "version"/>
+    </resultMap>
+    <!--添加-->
+    <insert id = "addSpBroadCategory"
+            parameterType = "com.yp.spare.spBroadCategory.bean.SpBroadCategory">
+        insert into sp_broad_category
+        (category_code, category_name, category_type, category_remarks, category_addTime, category_addMan,
+         category_updateTime, category_updateMan)
+        values (#{code}, #{name}, #{status}, #{remark}, #{categoryAddTime}, #{categoryAddMan}, #{categoryUpdateTime},
+                #{categoryUpdateMan})
+    </insert>
+    <update id = "updateSpLittleCategory"
+            parameterType = "com.yp.spare.spBroadCategory.bean.SpBroadCategory">
+        update sp_little_category
+        <set>
+            <if test = "name != null and name != ''">
+                category_name = #{name},
+            </if>
+            <if test = "status != null">
+                category_type = #{status},
+            </if>
+            <if test = "remark != null and remark != ''">
+                category_remarks = #{remark},
+            </if>
+            category_updateTime = sysdate(),category_updateMan = #{categoryUpdateMan},category_version =
+            category_version + 1
+        </set>
+        where category_number = #{id}
+    </update>
+    <update id = "updateSpBroadCategoryByEnable"
+            parameterType = "com.yp.spare.spBroadCategory.bean.SpBroadCategory">
+        update sp_broad_category
+        <set>
+            <if test = "status != null">
+                category_type = #{status},
+            </if>
+            <if test = "categoryUpdateMan != null">
+                category_updateMan = #{categoryUpdateMan},
+            </if>
+            category_updateTime = sysdate(),category_version = category_version + 1
+        </set>
+        where category_number = #{id}
+    </update>
+    <select id = "getSpBroadCategoryByCode" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_broad_category
+        where category_code = #{categoryCode}
+    </select>
+    <select id = "getSpBroadCategoryByName" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_broad_category
+        where category_name = #{categoryName}
+    </select>
+    <select id = "getSpBroadCategoryByPage" resultType = "java.lang.Object">
+        select *
+        from sp_broad_category
+        <where>
+            <if test = "name != null and name != ''">
+                and category_name like concat('%',#{name},'%')
+            </if>
+            <if test = "code != null and code != ''">
+                and category_code like concat('%',#{code},'%')
+            </if>
+            <if test = "status != null">
+                and category_type = #{status}
+            </if>
+        </where>
+        order by category_addTime desc
+        limit #{offSize},#{pageSize}
+    </select>
+    <select id = "queryPage" resultMap = "SpBroadCategoryMap">
+        select *
+        from sp_broad_category
+        <where>
+            <if test = "name != null and name != ''">
+                and category_name like concat('%',#{name},'%')
+            </if>
+            <if test = "code != null and code != ''">
+                and category_code like concat('%',#{code},'%')
+            </if>
+            <if test = "status != null">
+                and category_type = #{status}
+            </if>
+        </where>
+        order by category_addTime desc
+        limit #{offSize},#{pageSize}
+    </select>
+    <select id = "queryPageCount" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_broad_category
+        <where>
+            <if test = "name != null and name != ''">
+                and category_name like concat('%',#{name},'%')
+            </if>
+            <if test = "code != null and code != ''">
+                and category_code like concat('%',#{code},'%')
+            </if>
+            <if test = "status != null">
+                and category_type = #{status}
+            </if>
+        </where>
+    </select>
+    <select id = "getSpBroadCategoryById" resultMap = "SpBroadCategoryMap">
+        select *
+        from sp_broad_category
+        where category_number = #{id}
+    </select>
+    <select id = "getSpBroadCategoryByNameAndId" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_broad_category
+        where category_name = #{name}
+          and category_number != #{id}
+    </select>
+    <select id = "queryAll" resultMap = "SpBroadCategoryMap">
+        select *
+        from sp_broad_category
+        where category_type = 1
+    </select>
+    <select id = "queryBroadCount" resultType = "java.lang.Integer">
+        select count(category_number)
+        from sp_broad_category
+        where category_type = 1
+    </select>
+
+
+</mapper>

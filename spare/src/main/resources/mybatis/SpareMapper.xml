@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "com.yp.spare.spare.mapper.SpareMapper">
+    <resultMap id = "SpareMap" type = "com.yp.spare.spare.bean.Spare">
+        <id column = "id" property = "id"/>
+        <result column = "code" property = "code"/>
+        <result column = "name" property = "name"/>
+        <result column = "status" property = "status"/>
+        <result column = "version" property = "version"/>
+        <result column = "littleName" property = "subClassName"/>
+        <result column = "little_id" property = "subClassId"/>
+        <result column = "broadName" property = "planClassName"/>
+        <result column = "broad_id" property = "planClassId"/>
+        <result column = "updateman" property = "updateman"/>
+        <result column = "updatetime" property = "updatetime"/>
+        <result column = "addman" property = "addman"/>
+        <result column = "addtime" property = "addtime"/>
+        <collection property = "legalPersonNames" ofType = "string">
+            <result column = "legalPersonName"/>
+        </collection>
+    </resultMap>
+    <insert id = "addSpare" parameterType = "com.yp.spare.spare.bean.Spare" useGeneratedKeys = "true"
+            keyProperty = "id" keyColumn = "id">
+        insert into spare(code, name, status, updateman, updatetime, addman, little_id, broad_id,
+                          addtime, version)
+        values (#{code}, #{name}, #{status}, #{updateman}, sysdate(),
+                #{addman}, #{subClassId}, #{planClassId}, sysdate(), 0)
+    </insert>
+    <insert id = "addSpareCor" parameterType = "com.yp.spare.spare.bean.SpareCor">
+        insert into cor_spare(cor_id,spare_id) values
+        <foreach collection = "legalPersonIds" item = "legalPersonId" open = "(" separator = "),(" close = ")">
+            #{legalPersonId}, #{spareId}
+        </foreach>
+    </insert>
+    <insert id = "addSpareAndCor">
+        insert into cor_spare(cor_id,spare_id) values
+        <foreach collection = "legalPersonId" item = "legalPersonId" open = "(" separator = "),(" close = ")">
+            #{legalPersonId},#{id}
+        </foreach>
+    </insert>
+    <update id = "updateStatus">
+        update spare
+        <set>
+            <if test = "status != null">
+                status = #{status},
+            </if>
+            <if test = "updateman != null">
+                updateman = #{updateman},
+            </if>
+            updatetime = sysdate(),version = version + 1
+        </set>
+        where id = #{id}
+    </update>
+    <update id = "updateSpare" parameterType = "com.yp.spare.spare.bean.Spare">
+        update spare
+        <set>
+            <if test = "name != null">
+                name = #{name},
+            </if>
+            <if test = "status != null">
+                status = #{status},
+            </if>
+            <if test = "planClassId != null">
+                broad_id = #{planClassId},
+            </if>
+
+            <if test = "subClassId != null">
+                little_id = #{subClassId},
+            </if>
+            <if test = "updateman != null">
+                updateman = #{updateman},
+            </if>
+            updatetime = sysdate(),version = version + 1
+        </set>
+        where id = #{id}
+    </update>
+    <delete id = "deleteSpareAndCor">
+        delete
+        from cor_spare
+        where spare_id = #{id}
+    </delete>
+    <select id = "queryPage" resultMap = "SpareMap">
+        select s.*,
+        sb.category_name as broadName,
+        sl.category_name as littleName,
+        cs.*,
+        group_concat(distinct lp.cor_name separator ',') as legalPersonName
+        from spare as s
+        left join sp_broad_category sb on s.broad_id = sb.category_number
+        left join sp_little_category sl on s.little_id = sl.category_number
+        left join cor_spare cs on s.id = cs.spare_id
+        left join corporation lp on cs.cor_id = lp.id
+        <where>
+            <if test = "code != null and code != ''">
+                and s.code like concat('%',#{code},'%')
+            </if>
+            <if test = "name != null and name != ''">
+                and s.name like concat('%',#{name},'%')
+            </if>
+            <if test = "status != null">
+                and s.status = #{status}
+            </if>
+        </where>
+        group by s.id
+        limit #{offSize},#{pageSize}
+    </select>
+    <select id = "queryCount" resultType = "java.lang.Integer">
+        select count(s.id)
+        from spare as s
+        left join sp_broad_category sb on s.broad_id = sb.category_number
+        left join sp_little_category sl on s.little_id = sl.category_number
+        <where>
+            <if test = "code != null and code != ''">
+                and s.code like concat('%',#{code},'%')
+            </if>
+            <if test = "name != null and name != ''">
+                and s.name like concat('%',#{name},'%')
+            </if>
+            <if test = "status != null">
+                and s.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id = "queryCodeCount" resultType = "java.lang.Integer">
+        select count(code) from spare
+        <where>
+            <if test = "code != null and code != ''">
+                and code like concat('%',#{code},'%')
+            </if>
+        </where>
+    </select>
+    <select id = "queryPrentId" resultType = "com.yp.spare.spare.bean.Spare">
+        select * from spare
+        <where>
+            <if test = "id != null">
+                and id = #{id}
+            </if>
+        </where>
+    </select>
+    <select id = "getSparePeronList" resultType = "com.yp.spare.spare.bean.SpareCorByName">
+        select group_concat(distinct c.cor_name separator ',') as legalPersonName,
+        spare_id as spareId
+        from cor_spare as cs
+        left join corporation as c on c.id = cs.cor_id
+        where cs.spare_id in
+        <foreach collection = "spareIds" item = "spareId" open = "(" separator = "," close = ")">
+            #{spareId}
+        </foreach>
+        group by spare_id
+    </select>
+    <select id = "queryNameCount" resultType = "java.lang.Integer">
+        select count(id)
+        from spare
+        where id != #{id}
+          and name = #{name}
+    </select>
+    <select id = "queryIdBySpare" resultType = "java.lang.Integer">
+        select COUNT(id)
+        from spare
+        where id = #{id}
+    </select>
+</mapper>

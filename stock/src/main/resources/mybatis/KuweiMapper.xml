@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "com.yp.stock.kuwei.mapper.KuweiMapper">
+    <resultMap id = "KuweiMap" type = "com.yp.stock.kuwei.bean.Kuwei">
+        <id column = "id" property = "id"/>
+        <result column = "code" property = "code"/>
+        <result column = "name" property = "name"/>
+        <result column = "status" property = "status"/>
+
+        <result column = "version" property = "version"/>
+        <result column = "update_man" property = "updateMan"/>
+        <result column = "update_time" property = "updateTime"/>
+        <result column = "add_man" property = "addMan"/>
+        <result column = "add_time" property = "addTime"/>
+
+        <result column = "kuqu_code" property = "storageSectionCode"/>
+        <result column = "kuqu_name" property = "storageSectionName"/>
+        <result column = "kuqu_remark" property = "storageSectionRemark"/>
+        <result column = "kufang_code" property = "wareHouseCode"/>
+        <result column = "kufang_name" property = "wareHouseName"/>
+        <result column = "kufang_remark" property = "wareHouseRemark"/>
+
+    </resultMap>
+
+    <select id = "getTotalCount" resultType = "java.lang.Integer">
+        select count(warehouse.id) from warehouse
+        left join reservoir_area on warehouse.area_code = reservoir_area.area_code
+        left join storehouse on reservoir_area.storehouse_code = storehouse.code
+        <where>
+            <if test = "code != null and code != ''">
+                and warehouse.code like concat('%',#{code},'%')
+            </if>
+            <if test = "name != null and name != ''">
+                and warehouse.name like concat('%',#{name},'%')
+            </if>
+            <if test = "status != null">
+                and warehouse.status = #{status}
+            </if>
+
+            <if test = "storageSectionCode != null and storageSectionCode != ''">
+                and warehouse.area_code like concat('%',#{storageSectionCode},'%')
+            </if>
+            <if test = "storageSectionName != null and storageSectionName != ''">
+                and reservoir_area.name like concat('%',#{storageSectionName},'%')
+            </if>
+
+            <if test = "wareHouseCode != null and wareHouseCode != ''">
+                and storehouse.code like concat('%',#{wareHouseCode},'%')
+            </if>
+            <if test = "wareHouseName != null and wareHouseName != ''">
+                and storehouse.name like concat('%',#{wareHouseName},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id = "queryKuweiPage" resultMap = "KuweiMap">
+        select warehouse.id as id,warehouse.code as code, warehouse.name as name,warehouse.status as status,
+        warehouse.area_code as kuqu_code,reservoir_area.name as kuqu_name,reservoir_area.remark as kuqu_remark,
+        storehouse.code as kufang_code,storehouse.name as kufang_name,storehouse.remark as kufang_remark
+        from warehouse
+        left join reservoir_area on warehouse.area_code = reservoir_area.area_code
+        left join storehouse on reservoir_area.storehouse_code = storehouse.code
+        <where>
+            <if test = "code != null and code != ''">
+                and warehouse.code like concat('%',#{code},'%')
+            </if>
+            <if test = "name != null and name != ''">
+                and warehouse.name like concat('%',#{name},'%')
+            </if>
+            <if test = "status != null">
+                and warehouse.status = #{status}
+            </if>
+            <if test = "storageSectionCode != null and storageSectionCode != ''">
+                and warehouse.area_code like concat('%',#{storageSectionCode},'%')
+            </if>
+            <if test = "storageSectionName != null and storageSectionName != ''">
+                and reservoir_area.name like concat('%',#{storageSectionName},'%')
+            </if>
+
+            <if test = "wareHouseCode != null and wareHouseCode != ''">
+                and storehouse.code like concat('%',#{wareHouseCode},'%')
+            </if>
+            <if test = "wareHouseName != null and wareHouseName != ''">
+                and storehouse.name like concat('%',#{wareHouseName},'%')
+            </if>
+        </where>
+        order by warehouse.add_time desc limit #{offSize},#{pageSize}
+    </select>
+
+    <update id = "updateKuweiStatus">
+        update warehouse
+        <set>
+            <if test = "status != null">
+                status = #{status},
+            </if>
+            update_time = sysdate(),version = version + 1
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id = "getStatus" resultType = "java.lang.Integer">
+        select status
+        from warehouse
+        where id = #{id}
+    </select>
+
+    <select id = "getName" resultType = "java.lang.Integer">
+        select count(#{name})
+        from warehouse
+        where id != #{id}
+          and name = #{name}
+    </select>
+
+    <update id = "updateKuwei" parameterType = "com.yp.stock.kuwei.bean.Kuwei">
+        update warehouse
+        set name=#{name},
+            update_time = sysdate(),
+            version = version + 1
+        where id = #{id}
+    </update>
+
+    <select id = "yanNameList" resultType = "java.lang.Integer">
+        SELECT count(id) from warehouse where name in
+        <foreach collection = "nameAndCodeList" item = "i" open = "(" separator = "," close = ")">
+            #{i.name}
+        </foreach>
+    </select>
+    <select id = "yanCodeList" resultType = "java.lang.Integer">
+        SELECT count(id) from warehouse where code in
+        <foreach collection = "nameAndCodeList" item = "i" open = "(" separator = "," close = ")">
+            #{i.code}
+        </foreach>
+    </select>
+
+    <insert id = "addKuweiList" parameterType = "java.util.List">
+        insert into warehouse(code, name, status, area_code, update_time, update_man,add_man, add_time, version)
+        values
+        <foreach collection = "addList" item = "i" separator = ",">
+            (#{i.code}, #{i.name}, #{i.status},#{i.storageSectionCode},sysdate(), #{i.addMan}, #{i.addMan},sysdate(), 0)
+        </foreach>
+    </insert>
+
+    <select id = "getKuweiByKuqu" resultMap = "KuweiMap">
+        select warehouse.id          as id,
+               warehouse.code        as code,
+               warehouse.name        as name,
+               warehouse.status      as status,
+               warehouse.area_code   as kuqu_code,
+               reservoir_area.name   as kuqu_name,
+               reservoir_area.remark as kuqu_remark,
+               storehouse.code       as kufang_code,
+               storehouse.name       as kufang_name,
+               storehouse.remark     as kufang_remark
+        from warehouse
+                 left join reservoir_area on warehouse.area_code = reservoir_area.area_code
+                 left join storehouse on reservoir_area.storehouse_code = storehouse.code
+
+    </select>
+</mapper>

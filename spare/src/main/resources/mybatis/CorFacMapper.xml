@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace即使不用到这个属性也不能为空 -->
+<mapper namespace = "com.yp.spare.corfac.mapper.CorFacMapper">
+    <resultMap id = "CorFacMap" type = "com.yp.spare.corfac.bean.CorFac">
+        <id column = "fac_code" property = "legalPlantCode"/>
+        <result column = "fac_remarks" property = "legalPlantDec"/>
+        <result column = "fac_type" property = "enabled"/>
+        <result column = "cor_code" property = "legalPersonCode"/>
+        <result column = "cor_name" property = "legalPersonName"/>
+    </resultMap>
+    <insert id = "addCorFac" parameterType = "com.yp.spare.corfac.bean.CorFac">
+        insert into factory
+        (fac_code, fac_remarks, fac_type, cor_code, addMan, addTime, updateMan, updateTime)
+        values (#{legalPlantCode}, #{legalPlantDec}, #{enabled}, #{legalPersonCode},
+                #{facAddMan}, SYSDATE(), #{facUpdateMan}, SYSDATE())
+    </insert>
+    <update id = "updateCorFac" parameterType = "com.yp.spare.corfac.bean.CorFac">
+        update factory
+        <set>
+            <if test = "legalPlantDec != null and legalPlantDec != ''">
+                fac_remarks = #{legalPlantDec},
+            </if>
+            updateTime = sysdate(),updateMan = #{facUpdateMan},version = version + 1
+        </set>
+        where fac_code = #{legalPlantCode}
+    </update>
+    <update id = "updateStatus">
+        update factory
+        <set>
+            fac_type = #{enabled}
+        </set>
+        where fac_code = #{legalPlantCode}
+    </update>
+    <select id = "getCorFacByPage" resultMap = "CorFacMap">
+        select f.fac_code, f.fac_remarks, f.fac_type, f.cor_code, c.cor_name
+        from corporation as c
+        left join factory as f on c.cor_code = f.cor_code
+        <where>
+            <if test = "legalPlantDec != null and legalPlantDec != ''">
+                and fac_remarks like concat('%',#{legalPlantDec},'%')
+            </if>
+            <if test = "legalPersonName != null and legalPersonName != ''">
+                and c.cor_name like concat('%',#{legalPersonName},'%')
+            </if>
+            <if test = "legalPersonCode != null and legalPersonCode != ''">
+                and f.fac_code like concat('%',#{legalPlantCode},'%')
+            </if>
+            <if test = "enabled != null">
+                and fac_type = #{enabled}
+            </if>
+        </where>
+        order by updateTime desc
+        limit #{offSize},#{pageSize}
+    </select>
+    <select id = "getCorFacCount" resultType = "java.lang.Integer">
+        select count(fac_code)
+        from corporation as c
+        left join factory as f on c.cor_code = f.cor_code
+        <where>
+            <if test = "legalPlantDec != null and legalPlantDec != ''">
+                and fac_remarks like concat('%',#{legalPlantDec},'%')
+            </if>
+            <if test = "legalPersonName != null and legalPersonName != ''">
+                and c.cor_name like concat('%',#{legalPersonName},'%')
+            </if>
+            <if test = "legalPlantCode != null and legalPlantCode != ''">
+                and f.fac_code like concat('%',#{legalPlantCode},'%')
+            </if>
+            <if test = "enabled != null">
+                and fac_type = #{enabled}
+            </if>
+        </where>
+        order by updateTime desc
+    </select>
+    <select id = "getLegalPlantCode" resultType = "java.lang.Integer">
+        select count(fac_code)
+        from factory
+        where fac_code = #{legalPlantCode}
+    </select>
+    <select id = "getLegalPlantDec" resultType = "java.lang.Integer">
+        select count(fac_remarks)
+        from factory
+        where fac_remarks = #{legalPlantDec}
+    </select>
+    <select id = "getDown" resultType = "com.yp.spare.corfac.bean.CorNameVo">
+        select id, cor_code as legalPersonCode, cor_name as legalPersonName
+        from corporation
+        where user_id = #{userId}
+    </select>
+    <select id = "queryPlantListByLegalPersonCode"
+            resultType = "com.yp.spare.corfac.bean.CorFacByList">
+        select fac_remarks as legalPlantCode, fac_remarks as legalPlantDec
+        from factory
+        where cor_code = #{i}
+           or cor_code = #{i1}
+            and fac_type = 1
+    </select>
+
+</mapper>

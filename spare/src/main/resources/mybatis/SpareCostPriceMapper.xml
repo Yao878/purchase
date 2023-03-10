@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace即使不用到这个属性也不能为空 -->
+<mapper namespace = "com.yp.spare.spareCostPrice.mapper.SpareCostPriceMapper">
+    <resultMap id = "SpareCostPriceMap" type = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        <id property = "spareCostPriceId" column = "id"/>
+        <result property = "spareCostPrice" column = "price"/>
+        <result property = "status" column = "status"/>
+        <result property = "priceType" column = "price_type"/>
+        <result property = "unitType" column = "unit_type"/>
+        <result property = "effectiveTime" column = "effective_time"/>
+        <result property = "invalidTime" column = "invalid_time"/>
+        <result property = "addTime" column = "add_time"/>
+        <result property = "addUser" column = "add_user"/>
+        <result property = "updateTime" column = "update_time"/>
+        <result property = "updateUser" column = "update_user"/>
+        <result property = "spareCostPriceRemark" column = "remark"/>
+        <result property = "version" column = "version"/>
+        <result property = "facCode" column = "fac_code"/>
+        <result property = "corId" column = "cor_id"/>
+    </resultMap>
+    <insert id = "addSpareCostPrice"
+            parameterType = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        insert into spare_cost_price
+        (spare_id, fac_code, price_type, currency_id, taxrate_id, unit_type, price, effective_time, invalid_time,
+         status, remark, cor_id, add_time, add_user, update_time, update_user, version)
+        values (#{spareId}, #{facCode}, #{priceType}, #{currencyId}, #{taxrateId}, #{unitType}, #{spareCostPrice},
+                #{effectiveTime}, #{invalidTime}, #{status}, #{spareCostPriceRemark}, #{corId}, #{addTime}, #{addUser},
+                #{updateTime}, #{updateUser}, 0)
+    </insert>
+    <insert id = "addSpareCostPriceList"
+            parameterType = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        insert into spareprice
+        (spare_name,spare_code,tax_type,spar_price ,
+        effective_time , invalid_time
+        )
+        values
+        <foreach collection = "spareCostList" item = "item" index = "index" separator = ",">
+            (#{item.spareName}, #{item.spareCode}, #{item.taxType},
+            #{item.spareCostPrice}, #{item.effectiveTime}, #{item.invalidTime})
+        </foreach>
+    </insert>
+    <update id = "updateSpareCostPrice"
+            parameterType = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        update spare_cost_price
+        set invalid_time = #{invalidTime},
+            update_time  = sysdate(),
+            update_user  = 'admin',
+            version      = version + 1
+        where id = #{spareCostPriceId}
+    </update>
+    <update id = "updateStatus">
+        update spare_cost_price
+        set status      = #{status},
+            update_time = sysdate(),
+            update_user = 'admin'
+        where id = #{spareCostPriceId}
+    </update>
+
+    <select id = "queryPage" resultType = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        select
+        s.code spareCode,
+        s.name spareName,
+        f.fac_code facCode,
+        scp.price_type priceType,
+        cu.currency_name currencyName,
+        t.remark taxrateRemark,
+        scp.unit_type,
+        scp.price spareCostPrice,
+        scp.effective_time effectiveTime,
+        scp.invalid_time invalidTime,
+        scp.status,
+        scp.remark spareCostPriceRemark,
+        c.cor_code corCode
+        from spare_cost_price as scp
+        left join corporation c on scp.cor_id = c.id
+        left join spare as s on scp.spare_id = s.id
+        left join factory as f on f.fac_code = scp.fac_code
+        left join currency as cu on cu.id = scp.currency_id
+        left join taxrate as t on t.id = scp.taxrate_id
+        <where>
+            <if test = "facCode != null and facCode != ''">
+                fac_code = #{facCode}
+            </if>
+            <if test = "priceType != null and priceType != ''">
+                and price_type = #{priceType}
+            </if>
+            <if test = "unitType != null and unitType != ''">
+                and unit_type = #{unitType}
+            </if>
+            <if test = "effectiveTime != null and effectiveTime != ''">
+                and effective_time = #{effectiveTime}
+            </if>
+            <if test = "invalidTime != null and invalidTime != ''">
+                and invalid_time = #{invalidTime}
+            </if>
+            <if test = "addTime != null and addTime != ''">
+                and add_time = #{addTime}
+            </if>
+            <if test = "addUser != null and addUser != ''">
+                and add_user = #{addUser}
+            </if>
+            <if test = "updateTime != null and updateTime != ''">
+                and update_time = #{updateTime}
+            </if>
+            <if test = "updateUser != null and updateUser != ''">
+                and update_user = #{updateUser}
+            </if>
+            <if test = "spareCostPriceRemark != null and spareCostPriceRemark != ''">
+                and remark = #{spareCostPriceRemark}
+            </if>
+        </where>
+    </select>
+    <select id = "getPriceCount" resultType = "java.lang.Integer">
+        select count(id) from spare_cost_price
+        <where>
+            <if test = "facCode != null and facCode != ''">
+                fac_code = #{facCode}
+            </if>
+            <if test = "priceType != null and priceType != ''">
+                and price_type = #{priceType}
+            </if>
+            <if test = "unitType != null and unitType != ''">
+                and unit_type = #{unitType}
+            </if>
+            <if test = "effectiveTime != null and effectiveTime != ''">
+                and effective_time = #{effectiveTime}
+            </if>
+            <if test = "invalidTime != null and invalidTime != ''">
+                and invalid_time = #{invalidTime}
+            </if>
+            <if test = "addTime != null and addTime != ''">
+                and add_time = #{addTime}
+            </if>
+            <if test = "addUser != null and addUser != ''">
+                and add_user = #{addUser}
+            </if>
+            <if test = "updateTime != null and updateTime != ''">
+                and update_time = #{updateTime}
+            </if>
+            <if test = "updateUser != null and updateUser != ''">
+                and update_user = #{updateUser}
+            </if>
+            <if test = "spareCostPriceRemark != null and spareCostPriceRemark != ''">
+                and remark = #{spareCostPriceRemark}
+            </if>
+        </where>
+    </select>
+    <select id = "getSpareCorFacCount" resultType = "java.lang.Integer">
+        select count(id)
+        from spare_cost_price
+        where fac_code = #{facCode}
+          and cor_id = #{corId}
+          and spare_id = #{spareCode}
+    </select>
+    <select id = "getSpareCorFac" resultType = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        select ID             AS spareCostPriceId,
+               PRICE          as spareCostPrice,
+               PRICE_TYPE     as priceType,
+               UNIT_TYPE      as unitType,
+               EFFECTIVE_TIME as effectiveTime,
+               INVALID_TIME   as invalidTime,
+               ADD_TIME       as addTime,
+               ADD_USER       as addUser,
+               UPDATE_TIME    as updateTime,
+               UPDATE_USER    as updateUser,
+               REMARK         as spareCostPriceRemark,
+               VERSION        as version,
+               SPARE_ID       as spareId,
+               CURRENCY_ID    as currencyId,
+               TAXRATE_ID     as taxrateId,
+               COR_ID         as corId,
+               FAC_CODE       as facCode
+        from spare_cost_price
+        where fac_code = #{facCode}
+          and cor_id = #{corId}
+          and spare_id = #{spareId}
+    </select>
+    <select id = "selectSparePrice" resultType = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        select *
+        from spareprice
+    </select>
+    <select id = "exportFile" resultType = "com.yp.spare.spareCostPrice.bean.SpareCostPrice">
+        select
+        s.code spareCode,
+        s.name spareName,
+        f.fac_code facCode,
+        scp.price_type priceType,
+        cu.currency_name currencyName,
+        t.remark taxrateRemark,
+        scp.unit_type,
+        scp.price spareCostPrice,
+        scp.effective_time effectiveTime,
+        scp.invalid_time invalidTime,
+        scp.status,
+        scp.remark spareCostPriceRemark,
+        c.cor_code corCode
+        from spare_cost_price as scp
+        left join corporation c on scp.cor_id = c.id
+        left join spare as s on scp.spare_id = s.id
+        left join factory as f on f.fac_code = scp.fac_code
+        left join currency as cu on cu.id = scp.currency_id
+        left join taxrate as t on t.id = scp.taxrate_id
+        <where>
+            <if test = "facCode != null and facCode != ''">
+                fac_code = #{facCode}
+            </if>
+            <if test = "priceType != null and priceType != ''">
+                and price_type = #{priceType}
+            </if>
+            <if test = "unitType != null and unitType != ''">
+                and unit_type = #{unitType}
+            </if>
+            <if test = "effectiveTime != null and effectiveTime != ''">
+                and effective_time = #{effectiveTime}
+            </if>
+            <if test = "invalidTime != null and invalidTime != ''">
+                and invalid_time = #{invalidTime}
+            </if>
+            <if test = "addTime != null and addTime != ''">
+                and add_time = #{addTime}
+            </if>
+            <if test = "addUser != null and addUser != ''">
+                and add_user = #{addUser}
+            </if>
+            <if test = "updateTime != null and updateTime != ''">
+                and update_time = #{updateTime}
+            </if>
+            <if test = "updateUser != null and updateUser != ''">
+                and update_user = #{updateUser}
+            </if>
+            <if test = "spareCostPriceRemark != null and spareCostPriceRemark != ''">
+                and remark = #{spareCostPriceRemark}
+            </if>
+        </where>
+    </select>
+</mapper>

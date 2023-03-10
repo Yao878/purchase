@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace即使不用到这个属性也不能为空 -->
+<mapper namespace = "com.yp.stock.storeHouse.mapper.StoreHouseMapper">
+    <resultMap id = "Map" type = "com.yp.stock.storeHouse.bean.StoreHouse">
+        <id column = "id" property = "id" jdbcType = "INTEGER"/>
+        <result column = "code" property = "code"/>
+        <result column = "name" property = "name"/>
+        <result column = "address" property = "address"/>
+        <result column = "remark" property = "remark"/>
+        <result column = "ident_code" property = "identCode"/>
+        <result column = "version" property = "version"/>
+        <result column = "add_man" property = "addMan"/>
+        <result column = "add_time" property = "addTime"/>
+        <result column = "update_man" property = "updateMan"/>
+        <result column = "update_time" property = "updateTime"/>
+        <result column = "region" property = "region"/>
+        <result column = "country" property = "country"/>
+        <result column = "province" property = "province"/>
+        <result column = "city" property = "city"/>
+        <result column = "county" property = "county"/>
+        <result column = "status" property = "status"/>
+        <result column = "statusName" property = "statusName"/>
+    </resultMap>
+    <resultMap id = "identMap" type = "com.yp.stock.storeHouse.bean.StorehouseIdentification">
+        <id column = "id" property = "id" jdbcType = "INTEGER"/>
+        <result column = "code" property = "code"/>
+        <result column = "name" property = "name"/>
+        <result column = "remark" property = "remark"/>
+        <result column = "version" property = "version"/>
+        <result column = "add_man" property = "addMan"/>
+        <result column = "add_time" property = "addTime"/>
+        <result column = "update_man" property = "updateMan"/>
+        <result column = "update_time" property = "updateTime"/>
+        <result column = "version" property = "version"/>
+    </resultMap>
+    <insert id = "add">
+        INSERT INTO storehouse
+        (code, name, address, remark, ident_code, version, add_time, update_time,
+         add_man, update_man, region_id, country_id, province_id, city_id, county_id)
+        VALUES (#{code}, #{name}, #{address}, #{remark}, #{identCode}, 0, sysDate(), sysDate(),
+                #{addMan}, #{updateMan}, #{regionId}, #{countryId}, #{provinceId}, #{cityId}, #{countyId})
+    </insert>
+    <insert id = "addIdent" parameterType = "com.yp.stock.storeHouse.bean.StorehouseIdentification">
+        INSERT INTO storehouse_identification
+        (code, name, remark, version, add_time, update_time, add_man, update_man)
+        VALUES (#{code}, #{name}, #{remark}, 0, sysDate(), sysDate(), #{addMan}, #{updateMan})
+    </insert>
+    <update id = "update" parameterType = "com.yp.stock.storeHouse.bean.StoreHouse">
+        update storehouse
+        <set>
+            <if test = "name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test = "status != null">
+                status = #{status},
+            </if>
+            <if test = "remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            <if test = "address != null and address != ''">
+                address = #{address},
+            </if>
+            update_time = sysdate(),update_man = #{updateMan},
+            version = version + 1
+        </set>
+        where id = #{id}
+    </update>
+    <update id = "updateStatus" parameterType = "com.yp.stock.storeHouse.bean.StoreHouse">
+        update storehouse
+        <set>
+            status = #{status},
+            update_time = sysdate(),update_man = #{updateMan},
+        </set>
+        where id = #{id}
+    </update>
+    <update id = "updateIdent" parameterType = "com.yp.stock.storeHouse.bean.StorehouseIdentification">
+        update storehouse_identification
+        <set>
+            <if test = "name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test = "status != null">
+                status = #{status},
+            </if>
+            <if test = "remark != null and remark != ''">
+                remark = #{remark},
+            </if>
+            update_time = sysdate(),update_man = #{updateMan},
+            version = version + 1
+        </set>
+        where id = #{id}
+    </update>
+    <update id = "updateStatusIdent" parameterType = "com.yp.stock.storeHouse.bean.StorehouseIdentification">
+        update storehouse_identification
+        <set>
+            status = #{status},
+            update_time = sysdate(),update_man = #{updateMan},
+        </set>
+        where id = #{id}
+    </update>
+    <select id = "queryPage" resultMap = "Map">
+        SELECT name,code,status,remark,ident_code,region,country ,province,county,city,address
+        FROM storehouse
+        left join city c on c.id = storehouse.city_id
+        left join county co on co.id = storehouse.county_id
+        left join province p on p.id = storehouse.province_id
+        left join country cou on cou.id = storehouse.country_id
+        left join region r on r.id = storehouse.region_id
+        <where>
+            <if test = "code != null and code != ''">
+                code like concat('%',#{code},'%')
+            </if>
+            <if test = "name != null and name != ''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test = "remark != null and remark != ''">
+                and remark like concat('%',#{remark},'%')
+            </if>
+            <if test = "status != null">
+                and status like concat('%',#{status},'%')
+            </if>
+        </where>
+        order by add_time desc
+    </select>
+    <select id = "queryByName" resultMap = "Map">
+        SELECT *
+        FROM storehouse
+        where name = #{name}
+    </select>
+    <select id = "queryByCode" resultMap = "Map">
+        SELECT *
+        FROM storehouse
+        where code = #{code}
+    </select>
+    <select id = "queryPageIdent"
+            resultMap = "identMap">
+        select * from storehouse_identification
+        <where>
+            <if test = "name!=null and name !=''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test = "code!=null and code !=''">
+                and code like concat('%',#{code},'%')
+            </if>
+            <if test = "status!=null">
+                status=#{status}
+            </if>
+        </where>
+    </select>
+    <select id = "queryIdentByName"
+            resultType = "com.yp.stock.storeHouse.bean.StorehouseIdentification">
+        SELECT *
+        FROM storehouse_identification
+        where name = #{name}
+    </select>
+    <select id = "queryIdentById"
+            resultType = "com.yp.stock.storeHouse.bean.StorehouseIdentification">
+        SELECT *
+        FROM storehouse_identification
+        where id = #{id}
+    </select>
+    <select id = "queryById" resultType = "com.yp.stock.storeHouse.bean.StoreHouse">
+        SELECT *
+        FROM storehouse
+        where id = #{id}
+    </select>
+    <select id = "queryArea" resultType = "java.lang.String">
+        SELECT region regionName
+        FROM region
+    </select>
+    <select id = "queryCountry" resultType = "java.lang.String">
+        SELECT country countryName
+        FROM country
+    </select>
+    <select id = "queryProvince" resultType = "java.lang.String">
+        SELECT province provinceName
+        FROM province
+    </select>
+    <select id = "queryCity" resultType = "java.lang.String">
+        SELECT city cityName
+        FROM city
+    </select>
+    <select id = "queryCounty" resultType = "java.lang.String">
+        SELECT county countyName
+        FROM county
+    </select>
+
+    <select id = "getDown" resultType = "com.yp.stock.storeHouse.bean.StoreHouse">
+        SELECT id, code, name
+        FROM storehouse
+        where status = 1
+    </select>
+
+    <select id = "getIdent" resultType = "com.yp.stock.storeHouse.bean.StorehouseIdentification">
+        SELECT id, code, name
+        FROM storehouse_identification
+        where status = 1
+    </select>
+</mapper>

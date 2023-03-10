@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "com.yp.stock.warehouseOwnership.mapper.OwnershipMapper">
+
+    <resultMap id = "FirstMap" type = "com.yp.stock.area.bean.Area">
+        <id column = "id" property = "id"/>
+        <result column = "area_code" property = "areaCode"/>
+        <result column = "name" property = "name"/>
+        <result column = "remark" property = "remark"/>
+        <result column = "wareHouseCode" property = "wareHouseCode"/>
+        <result column = "warehouseName" property = "wareHouseName"/>
+        <result column = "warehouseRemark" property = "wareHouseRemark"/>
+    </resultMap>
+    <select id = "queryFirstPage" resultType = "com.yp.stock.warehouseOwnership.bean.FirstPageVo">
+        select * from warehouse w
+        left join reservoir_area ra on w.area_code = ra.area_code
+        left join storehouse s on ra.storehouse_code = s.code
+        left join corporation c on w.cor_code = c.cor_code
+        <where>
+            # 法人编码
+            <if test = "cor_code != null and cor_code != ''">
+                and c.cor_code like concat('%', #{CorCode},'%')
+            </if>
+            <if test = "storehouseCode != null and storehouseCode != ''">
+                and s.code like concat('%', #{storehouseCode},'%')
+            </if>
+            <if test = "storehouseName != null and storehouseName != ''">
+                and s.name like concat('%', #{storehouseName},'%')
+            </if>
+            <if test = "storehouseRemark != null and storehouseRemark != ''">
+                and s.remark like concat('%', #{storehouseRemark},'%')
+            </if>
+            <if test = "status != null and status != ''">
+                and ra.status = #{status}
+            </if>
+        </where>
+        limit #{offSize},10
+    </select>
+    <select id = "queryFirstPageCount" resultType = "java.lang.Integer">
+        select count(*) from warehouse w
+        left join reservoir_area ra on w.area_code = ra.area_code
+        left join storehouse s on ra.storehouse_code = s.code
+        left join corporation c on w.cor_code = c.cor_code
+        <where>
+            # 法人编码
+            <if test = "cor_code != null and cor_code != ''">
+                and c.cor_code like concat('%', #{CorCode},'%')
+            </if>
+            <if test = "storehouseCode != null and storehouseCode != ''">
+                and s.code like concat('%', #{storehouseCode},'%')
+            </if>
+            <if test = "storehouseName != null and storehouseName != ''">
+                and s.name like concat('%', #{storehouseName},'%')
+            </if>
+            <if test = "storehouseRemark != null and storehouseRemark != ''">
+                and s.remark like concat('%', #{storehouseRemark},'%')
+            </if>
+            <if test = "status != null and status != ''">
+                and ra.status = #{status}
+            </if>
+        </where>
+    </select>
+    <select id = "queryStoreList" resultType = "com.yp.stock.storeHouse.bean.StoreHouse">
+        select *
+        from storehouse
+    </select>
+    <select id = "queryAreaList" resultType = "com.yp.stock.area.bean.Area">
+        select *
+        from reservoir_area
+    </select>
+    <select id = "queryKuweiList" resultType = "com.yp.stock.kuwei.bean.Kuwei">
+        select *
+        from warehouse
+    </select>
+    <select id = "queryKuweiListByCorCode" resultType = "com.yp.stock.kuwei.bean.Kuwei">
+        select *
+        from warehouse
+        where cor_code = #{corCode}
+    </select>
+    <select id = "queryCorCode" resultType = "java.lang.String">
+        select cor_code
+        from warehouse
+        where code = #{code}
+    </select>
+    <select id = "queryAreaListByKuweiList" resultType = "com.yp.stock.area.bean.Area">
+        select * from reservoir_area where area_code in
+        <foreach collection = "list" item = "item" open = "(" separator = "," close = ")">
+            #{item}
+        </foreach>
+    </select>
+    <select id = "queryStoreListByAreaList" resultType = "com.yp.stock.storeHouse.bean.StoreHouse">
+        select * from storehouse where code in
+        <foreach collection = "list" item = "item" open = "(" separator = "," close = ")">
+            #{item}
+        </foreach>
+    </select>
+    <select id = "queryStoreListByStorehouse"
+            resultType = "com.yp.stock.storeHouse.bean.StoreHouse">
+        select *
+        from storehouse
+        where code = #{code}
+    </select>
+    <select id = "queryAreaListByStorehouseList" resultType = "com.yp.stock.area.bean.Area">
+        select * from reservoir_area where storehouse_code in
+        <foreach collection = "list" item = "item" open = "(" separator = "," close = ")">
+            #{item}
+        </foreach>
+    </select>
+    <select id = "queryKuweiListByAreaList" resultType = "com.yp.stock.kuwei.bean.Kuwei">
+        select * from warehouse where area_code in
+        <foreach collection = "list" item = "item" open = "(" separator = "," close = ")">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id = "updateSituationByStoreCode" resultType = "java.lang.String">
+        select area_code
+        from reservoir_area
+        where
+        <foreach collection = "storeCodeList" item = "storeCode" separator = "or">
+            storehouse_code = #{storeCode}
+        </foreach>
+    </select>
+
+    <select id = "updateSituationByAreaCode" resultType = "java.lang.String">
+        select code
+        from warehouse
+        where
+        <foreach collection = "areaCodeList" item = "areaCode" separator = "or">
+            area_code = #{areaCode}
+        </foreach>
+    </select>
+
+    <select id = "updateStoreSituationByCorCode" resultType = "java.lang.String">
+        select s.code
+        from storehouse as s
+                 left join reservoir_area as r on r.storehouse_code = s.code
+                 left join warehouse as w on w.area_code = r.area_code
+        where cor_code = #{corCode}
+    </select>
+
+    <select id = "updateAreaSituationByCorCode" resultType = "java.lang.String">
+        select r.area_code
+        from reservoir_area as r
+                 left join warehouse as w on w.area_code = r.area_code
+        where cor_code = #{corCode}
+    </select>
+
+    <select id = "updateWareSituationByCorCode" resultType = "java.lang.String">
+        select code
+        from warehouse
+        where cor_code = #{corCode}
+    </select>
+
+    <update id = "deleteAllOwnershipByCorCode">
+        update warehouse
+        set cor_code = null
+        where cor_code = #{corCode}
+    </update>
+
+    <update id = "addOwnership">
+        update warehouse
+        set cor_code = #{corCode}
+        where
+        <foreach collection = "warehouseCodeList" item = "warehouseCode" separator = "or">
+            code = #{warehouseCode}
+        </foreach>
+    </update>
+</mapper>

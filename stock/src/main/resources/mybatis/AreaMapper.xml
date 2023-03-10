@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace = "com.yp.stock.area.mapper.AreaMapper">
+    <resultMap id = "AreaMap" type = "com.yp.stock.area.bean.Area">
+        <id column = "id" property = "id"/>
+        <result column = "area_code" property = "areaCode"/>
+        <result column = "name" property = "name"/>
+        <result column = "remark" property = "remark"/>
+        <result column = "wareHouseCode" property = "wareHouseCode"/>
+        <result column = "warehouseName" property = "wareHouseName"/>
+        <result column = "warehouseRemark" property = "wareHouseRemark"/>
+        <result column = "status" property = "status"/>
+        <result column = "management" property = "management"/>
+        <result column = "WMS" property = "wms"/>
+        <result column = "VIP" property = "vip"/>
+        <result column = "version" property = "version"/>
+    </resultMap>
+    <resultMap id = "AreaAttributeMap" type = "com.yp.stock.area.bean.AreaAttribute">
+        <id column = "id" property = "id"/>
+        <result column = "code" property = "code"/>
+        <result column = "name" property = "name"/>
+        <result column = "remark" property = "remark"/>
+        <result column = "status" property = "status"/>
+        <result column = "version" property = "version"/>
+    </resultMap>
+
+    <select id = "checkAreaAttributeCode" resultType = "java.lang.Integer"
+            parameterType = "com.yp.stock.area.bean.AreaAttribute">
+        select count(code)
+        from business_attribute
+        where code = #{code}
+    </select>
+
+    <select id = "checkAreaAttributeName" resultType = "java.lang.Integer"
+            parameterType = "com.yp.stock.area.bean.AreaAttribute">
+        select count(name)
+        from business_attribute
+        where code = #{name}
+    </select>
+
+    <insert id = "addAreaAttributeByVo" parameterType = "com.yp.stock.area.bean.AreaAttribute">
+        insert into business_attribute(code, name, remark, status, add_man, add_time, update_man, update_time, version)
+        values (#{code}, #{name}, #{remark}, #{status}, #{addMan}, #{addTime}, #{updateMan}, #{updateTime}, 0)
+    </insert>
+
+    <update id = "updateAreaAttributeStatus" parameterType = "com.yp.stock.area.bean.AreaAttribute">
+        update business_attribute
+        set status      = #{status},
+            update_time = sysdate(),
+            version     = version + 1
+        where id = #{id}
+    </update>
+
+    <update id = "updateAreaAttribute" parameterType = "com.yp.stock.area.bean.AreaAttribute">
+        update business_attribute
+        <set>
+            <if test = "name != null">
+                name = #{name},
+            </if>
+            <if test = "remark != null">
+                remark = #{remark},
+            </if>
+            update_time = sysdate(),version = version + 1
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id = "queryAreaAttributePage" resultMap = "AreaAttributeMap">
+        select id,code,name,remark,status from business_attribute
+        <where>
+            <if test = "code != null and code != ''">
+                and code like concat('%',#{code},'%')
+            </if>
+            <if test = "name != null and name != ''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test = "remark != null and remark != ''">
+                and remark like concat('%',#{remark},'%')
+            </if>
+            <if test = "status != null">
+                and status = #{status}
+            </if>
+        </where>
+        group by id
+        limit #{offSize},10
+    </select>
+
+    <select id = "queryAreaAttributeCount" resultType = "java.lang.Integer">
+        select count(id) from business_attribute
+        <where>
+            <if test = "code != null and code != ''">
+                and code like concat('%',#{code},'%')
+            </if>
+            <if test = "name != null and name != ''">
+                and name like concat('%',#{name},'%')
+            </if>
+            <if test = "remark != null and remark != ''">
+                and remark like concat('%',#{remark},'%')
+            </if>
+            <if test = "status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id = "checkAreaCode" resultType = "java.lang.Integer" parameterType = "com.yp.stock.area.bean.Area">
+        select count(area_code)
+        from reservoir_area
+        where
+        <foreach collection = "areaList" item = "area" separator = "or">
+            area_code = #{area.areaCode}
+        </foreach>
+    </select>
+
+    <select id = "checkAreaName" resultType = "java.lang.Integer" parameterType = "com.yp.stock.area.bean.Area">
+        select count(name)
+        from reservoir_area
+        where
+        <foreach collection = "areaList" item = "area" separator = "or">
+            name = #{area.name}
+        </foreach>
+    </select>
+
+    <insert id = "addAreaByList" parameterType = "com.yp.stock.area.bean.Area">
+        INSERT INTO
+        reservoir_area(area_code,name,status,remark,storehouse_code,management,WMS,VIP,add_time,add_man,update_time,update_man,version)
+        VALUES
+        <foreach collection = "areaList" item = "area" open = "(" separator = "),(" close = ")">
+            #{area.areaCode},#{area.name},#{area.status},#{area.remark},#{area.wareHouseCode},#{area.management},#{area.wms},#{area.vip},#{area.addTime}
+            ,#{area.addMan},#{area.updateTime},#{area.updateMan},0
+        </foreach>
+    </insert>
+
+    <update id = "updateAreaStatus" parameterType = "com.yp.stock.area.bean.Area">
+        update reservoir_area
+        set status      = #{status},
+            update_time = sysdate(),
+            version     = version + 1
+        where id = #{id}
+    </update>
+
+    <update id = "updateArea" parameterType = "com.yp.stock.area.bean.Area">
+        update reservoir_area
+        <set>
+            <if test = "name != null">
+                name = #{name},
+            </if>
+            <if test = "remark != null">
+                remark = #{remark},
+            </if>
+            update_time = sysdate(),version = version + 1
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id = "queryAreaPage" resultMap = "AreaMap">
+        select r.id,r.area_code,r.name,r.remark,r.status
+        ,s.code as wareHouseCode
+        ,s.name as wareHouseName
+        from reservoir_area as r
+        left join storehouse as s on r.storehouse_code = s.code
+        <where>
+            <if test = "areaCode != null and areaCode != ''">
+                and area_code like concat('%',#{areaCode},'%')
+            </if>
+            <if test = "areaName != null and areaName != ''">
+                and r.name like concat('%',#{areaName},'%')
+            </if>
+            <if test = "wareHouseCode != null and wareHouseCode != ''">
+                and s.code like concat('%',#{wareHouseCode},'%')
+            </if>
+            <if test = "wareHouseName != null and wareHouseName != ''">
+                and s.name like concat('%',#{wareHouseName},'%')
+            </if>
+            <if test = "status != null">
+                and r.status = #{status}
+            </if>
+        </where>
+        group by r.id
+    </select>
+
+    <select id = "queryAreaCount" resultType = "java.lang.Integer">
+        select count(r.id)
+        from reservoir_area as r
+        left join storehouse as s on r.storehouse_code = s.code
+        <where>
+            <if test = "areaCode != null and areaCode != ''">
+                and r.area_code like concat('%',#{areaCode},'%')
+            </if>
+            <if test = "areaName != null and areaName != ''">
+                and r.name like concat('%',#{areaName},'%')
+            </if>
+            <if test = "wareHouseCode != null and wareHouseCode != ''">
+                and s.code like concat('%',#{wareHouseCode},'%')
+            </if>
+            <if test = "wareHouseName != null and wareHouseName != ''">
+                and s.name like concat('%',#{wareHouseName},'%')
+            </if>
+            <if test = "areaStatus != null">
+                and r.status = #{areaStatus}
+            </if>
+        </where>
+    </select>
+
+    <insert id = "addRelationship" parameterType = "java.lang.String">
+        INSERT INTO area_business(business_code,area_code) VALUES
+        <foreach collection = "attributeList" item = "attribute" open = "(" separator = "),(" close = ")">
+            #{areaCode},#{attribute}
+        </foreach>
+    </insert>
+
+    <delete id = "deleteRelationship" parameterType = "com.yp.stock.area.bean.Area">
+        delete
+        from area_business
+        where area_code = #{areaCode}
+    </delete>
+
+    <select id = "queryAttribute" resultType = "java.lang.String">
+        select business_code
+        from area_business
+        where area_code = #{areaCode}
+    </select>
+
+    <select id = "getDown" resultMap = "AreaMap">
+        SELECT id, area_code, name
+        FROM reservoir_area
+        where status = 1
+    </select>
+
+    <select id = "getKuquByKufang" resultMap = "AreaMap">
+        SELECT reservoir_area.id as id, reservoir_area.area_code as code, reservoir_area.name as name
+        FROM reservoir_area
+                 left join storehouse on reservoir_area.storehouse_code = storehouse.code
+        where reservoir_area.status = 1
+          and storehouse.id = #{id}
+    </select>
+</mapper>
