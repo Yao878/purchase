@@ -29,8 +29,6 @@ public class AreaController {
     @Autowired
     private AreaService areaService;
 
-    //库区属性增删改查
-
     @RequestMapping("/addAreaAttribute")
     @ApiOperation(value = "添加库区属性")
     public ResultVo addAreaAttribute(@Valid @RequestBody AreaAttribute areaAttribute, BindingResult bindingResult) {
@@ -63,8 +61,6 @@ public class AreaController {
         return areaService.queryAreaAttributePage(queryPageVo);
     }
 
-    //库区增删改查
-
     @RequestMapping("/addArea")
     @ApiOperation(value = "添加库区")
     public ResultVo addArea(@Valid @RequestBody Area area, BindingResult bindingResult) {
@@ -86,7 +82,6 @@ public class AreaController {
     @PostMapping("/updateArea")
     @ApiOperation(value = "修改库区")
     public ResultVo updateArea(@Valid @RequestBody Area area, BindingResult bindingResult) {
-        //数据校验
         if (bindingResult.hasErrors()) {
             return ResultBuildVo.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
@@ -99,7 +94,6 @@ public class AreaController {
         return areaService.queryAreaPage(queryPageVo);
     }
 
-    //库区导入
     @PostMapping("import")
     @ApiOperation(value = "库区导入")
     public ResultVo importFile(MultipartFile file) throws Exception {

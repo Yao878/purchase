@@ -15,8 +15,12 @@
     <name>purchase</name>
     <description>purchase</description>
     <properties>
-        <java.version>17</java.version>
+        <java.version>8</java.version>
     </properties>
+    <modules>
+        <module>spare</module>
+        <module>stock</module>
+    </modules>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
