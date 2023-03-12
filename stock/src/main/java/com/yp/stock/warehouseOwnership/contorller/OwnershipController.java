@@ -27,9 +27,6 @@ public class OwnershipController {
     @RequestMapping("/queryFirstPage")
     @ApiOperation(value = "库房归属第一层分页查询")
     public ResultVo queryFirstPage(@RequestBody QueryPageVo queryPageVo) {
-        if (queryPageVo.getPageSize() == 0) {
-            queryPageVo.setPageSize(10);
-        }
         return ownershipService.queryFirstPage(queryPageVo);
     }
 

@@ -1,20 +1,22 @@
 package com.yp.stock.warehouseOwnership.service.Impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.yp.stock.area.bean.Area;
 import com.yp.stock.kuwei.bean.Kuwei;
 import com.yp.stock.storeHouse.bean.StoreHouse;
-import com.yp.stock.utils.AllRecordsVo;
-import com.yp.stock.utils.ParamUtil;
 import com.yp.stock.utils.ResultBuildVo;
 import com.yp.stock.utils.ResultVo;
-import com.yp.stock.warehouseOwnership.bean.*;
+import com.yp.stock.warehouseOwnership.bean.BigBean;
+import com.yp.stock.warehouseOwnership.bean.Ownership;
+import com.yp.stock.warehouseOwnership.bean.QueryPageVo;
+import com.yp.stock.warehouseOwnership.bean.SecendPageVo;
 import com.yp.stock.warehouseOwnership.mapper.OwnershipMapper;
 import com.yp.stock.warehouseOwnership.service.OwnershipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-
 
 @Service
 public class OwnershipServiceImpl implements OwnershipService {
@@ -23,29 +25,13 @@ public class OwnershipServiceImpl implements OwnershipService {
 
     @Override
     public ResultVo queryFirstPage(QueryPageVo queryPageVo) {
-        //计算分页用的参数值
-        Integer offSize = (queryPageVo.getPageIndex() - 1) * ParamUtil.PAGE_COUNT;
-        queryPageVo.setOffSize(offSize);
-        queryPageVo.setPageSize(ParamUtil.PAGE_COUNT);
-        if (queryPageVo.getCorName() != null) {
-            queryPageVo.setCorCode(ownershipMapper.queryCorCode(queryPageVo.getCorName()));
-        }
-        List<FirstPageVo> firstPageVoList = ownershipMapper.queryFirstPage(queryPageVo);
-        for (FirstPageVo a : firstPageVoList) {
+        PageHelper.startPage(queryPageVo.getPageIndex(), queryPageVo.getPageSize());
+        List<QueryPageVo> of = PageInfo.of(ownershipMapper.queryFirstPage(queryPageVo)).getList();
+        for (QueryPageVo a : of) {
             a.setStatusName(a.getStatus() ? "启用" : "禁用");
         }
-        //查询总条数
-        Integer totalCount = ownershipMapper.queryFirstPageCount(queryPageVo);
-        //计算
-        AllRecordsVo allRecordsVo = new AllRecordsVo();
-        allRecordsVo.setCurrentPage(queryPageVo.getPageIndex());
-        allRecordsVo.setPageSize(ParamUtil.PAGE_COUNT);
-        allRecordsVo.setTotalSize(totalCount);
-        Integer totalPage = totalCount % ParamUtil.PAGE_COUNT == 0 ? totalCount / ParamUtil.PAGE_COUNT : totalCount / ParamUtil.PAGE_COUNT + 1;
-        allRecordsVo.setTotalPage(totalPage);
-        allRecordsVo.setDataList(firstPageVoList);
         //赋值
-        return ResultBuildVo.success(allRecordsVo);
+        return ResultBuildVo.success(of);
     }
 
     @Override
@@ -63,14 +49,14 @@ public class OwnershipServiceImpl implements OwnershipService {
             bigBean.setStoreHouseList(storeHouseList).setKuweiList(kuweiList).setAreaList(areaList);
             return ResultBuildVo.success(bigBean);
         }
-        //如果法人Code不为空，就查询该法人下的库位
+        //如果法人Code不为空，就查询该法人下的库房
         else {
+            //查询该法人下的库房信息
+            List<StoreHouse> storeHouseList = ownershipMapper.queryStoreListByStorehouse(secendPageVo);
+            //查询该法人下的库区信息
+            List<Area> areaList = ownershipMapper.queryAreaListByStorehouseList(storeHouseList);
             //查询该法人下的库位信息
-            List<Kuwei> kuweiList = ownershipMapper.queryKuweiListByCorCode(secendPageVo.getCorCode());
-            //根据库位信息查询库区信息
-            List<Area> areaList = ownershipMapper.queryAreaListByKuweiList(kuweiList);
-            //根据库区信息查询库房信息
-            List<StoreHouse> storeHouseList = ownershipMapper.queryStoreListByAreaList(areaList);
+            List<Kuwei> kuweiList = ownershipMapper.queryKuweiListByAreaList(areaList);
             //将三个集合放到实体类中
             BigBean bigBean = new BigBean();
             bigBean.setStoreHouseList(storeHouseList).setKuweiList(kuweiList).setAreaList(areaList);

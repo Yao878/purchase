@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @Accessors(chain = true)
 public class Ownership {
+    private Integer id;
     /**
      * 库房编码
      */

@@ -27,11 +27,10 @@ public class StoreHouseServiceImpl implements StoreHouseService {
     public ResultVo queryPage(QueryPageVo queryPageVo) {
         PageHelper.startPage(queryPageVo.getPageIndex(), queryPageVo.getPageSize());
         PageInfo<StoreHouse> of = PageInfo.of(storeHouseMapper.queryPage(queryPageVo));
-        List<StoreHouse> kuFangVoList = storeHouseMapper.queryPage(queryPageVo);
-        for (StoreHouse Ident : kuFangVoList) {
+        for (StoreHouse Ident : of.getList()) {
             Ident.setStatusName(Ident.getStatus() ? "启用" : "禁用");
         }
-        of.setList(kuFangVoList);
+        of.setList(of.getList());
         return ResultBuildVo.success(of);
     }
 

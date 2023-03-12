@@ -14,7 +14,7 @@
         <result column = "warehouseName" property = "wareHouseName"/>
         <result column = "warehouseRemark" property = "wareHouseRemark"/>
     </resultMap>
-    <select id = "queryFirstPage" resultType = "com.yp.stock.warehouseOwnership.bean.FirstPageVo">
+    <select id = "queryFirstPage" resultType = "com.yp.stock.warehouseOwnership.bean.QueryPageVo">
         select * from warehouse w
         left join reservoir_area ra on w.area_code = ra.area_code
         left join storehouse s on ra.storehouse_code = s.code

@@ -3,7 +3,6 @@ package com.yp.stock.warehouseOwnership.mapper;
 import com.yp.stock.area.bean.Area;
 import com.yp.stock.kuwei.bean.Kuwei;
 import com.yp.stock.storeHouse.bean.StoreHouse;
-import com.yp.stock.warehouseOwnership.bean.FirstPageVo;
 import com.yp.stock.warehouseOwnership.bean.QueryPageVo;
 import com.yp.stock.warehouseOwnership.bean.SecendPageVo;
 import org.apache.ibatis.annotations.Mapper;
@@ -30,7 +29,7 @@ public interface OwnershipMapper {
     void addOwnership(@Param("corCode") String corCode, @Param("warehouseCodeList") List<String> warehouseCodeList);
 
 
-    List<FirstPageVo> queryFirstPage(QueryPageVo queryPageVo);
+    List<QueryPageVo> queryFirstPage(QueryPageVo queryPageVo);
 
     Integer queryFirstPageCount(QueryPageVo queryPageVo);
 
