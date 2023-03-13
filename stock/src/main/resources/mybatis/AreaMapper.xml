@@ -160,6 +160,7 @@
         select r.id,r.area_code,r.name,r.remark,r.status
         ,s.code as wareHouseCode
         ,s.name as wareHouseName
+        ,s.remark as wareHouseRemark
         from reservoir_area as r
         left join storehouse as s on r.storehouse_code = s.code
         <where>

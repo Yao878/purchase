@@ -1,11 +1,12 @@
 package com.yp.stock.warehouseOwnership.mapper;
 
 import com.yp.stock.area.bean.Area;
+import com.yp.stock.area.bean.AreaAttribute;
 import com.yp.stock.kuwei.bean.Kuwei;
 import com.yp.stock.storeHouse.bean.StoreHouse;
-import com.yp.stock.warehouseOwnership.bean.FirstPageVo;
-import com.yp.stock.warehouseOwnership.bean.QueryPageVo;
-import com.yp.stock.warehouseOwnership.bean.SecendPageVo;
+import com.yp.stock.warehouseOwnership.bean.BigBean;
+import com.yp.stock.warehouseOwnership.bean.Ownership;
+import com.yp.stock.warehouseOwnership.bean.ShipVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -15,42 +16,26 @@ import java.util.List;
 @Mapper
 public interface OwnershipMapper {
 
-    List<String> updateSituationByStoreCode(List<String> storeCodeList);
+    List<ShipVo> queryFirstPage(ShipVo shipVo);
 
-    List<String> updateSituationByAreaCode(List<String> areaCodeList);
+    int addOwnership(Ownership ownership);
+    List<Area> queryBusiness(String areaCode, String businessCode);
 
-    List<String> updateStoreSituationByCorCode(String corCode);
+    List<Kuwei> selectKuweiByLegalPersonId(String legalPersonCode);
 
-    List<String> updateAreaSituationByCorCode(String corCode);
+    List<Area> selectAreaByKuweiList(List<Kuwei> kuweiList);
 
-    List<String> updateWareSituationByCorCode(String corNCode);
+    List<StoreHouse> selectStoreHouseByAreaList(List<Area> areaList);
 
-    void deleteAllOwnershipByCorCode(String corCode);
+    List<StoreHouse> selectStoreHouse(BigBean bigBean);
 
-    void addOwnership(@Param("corCode") String corCode, @Param("warehouseCodeList") List<String> warehouseCodeList);
+    List<Area> queryAreaList(@Param("storeHouseList") List<StoreHouse> storeHouseList, @Param("attributeList") List<AreaAttribute> AreaAttribute);
 
+    List<Area> selectAreaByStoreHouseList(List<StoreHouse> storeHouseList);
 
-    List<FirstPageVo> queryFirstPage(QueryPageVo queryPageVo);
+    List<Kuwei> selectKuwei(List<Area> areaList);
 
-    Integer queryFirstPageCount(QueryPageVo queryPageVo);
+    Integer updateCorWarehouse(List<Kuwei> kuweiList);
 
-    List<StoreHouse> queryStoreList(SecendPageVo secendPageVo);
-
-    List<Area> queryAreaList(SecendPageVo secendPageVo);
-
-    List<Kuwei> queryKuweiList(SecendPageVo secendPageVo);
-
-    List<Kuwei> queryKuweiListByCorCode(String corCode);
-
-    String queryCorCode(String corName);
-
-    List<Area> queryAreaListByKuweiList(List<Kuwei> kuweiList);
-
-    List<StoreHouse> queryStoreListByAreaList(List<Area> areaList);
-
-    List<StoreHouse> queryStoreListByStorehouse(SecendPageVo secendPageVo);
-
-    List<Area> queryAreaListByStorehouseList(List<StoreHouse> storeHouseList);
-
-    List<Kuwei> queryKuweiListByAreaList(List<Area> areaList);
+    int updateStatus(Ownership ownership);
 }

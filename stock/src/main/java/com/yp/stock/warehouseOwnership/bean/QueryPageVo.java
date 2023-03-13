@@ -3,6 +3,8 @@ package com.yp.stock.warehouseOwnership.bean;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 /**
  * @author huimengYuan
  * @date 2023/2/7
@@ -15,15 +17,15 @@ public class QueryPageVo {
     /**
      * 库房编码
      */
-    private String WarehouseCode;
+    private String storehouseCode;
     /**
      * 库房名称
      */
-    private String WarehouseName;
+    private String storehouseName;
     /**
      * 库房描述
      */
-    private String WarehouseRemark;
+    private String storehouseRemark;
     /**
      * 法人名称
      */
@@ -31,7 +33,7 @@ public class QueryPageVo {
     /**
      * 法人编码
      */
-    private String CorCode;
+    private String corCode;
     /**
      * 状态
      */
@@ -43,7 +45,7 @@ public class QueryPageVo {
     /**
      * 库区业务属性
      */
-    private String areaAttribute;
+    private List<Integer> areaAttribute;
     private Integer offSize;//计算得出的第一个参数
     private Integer pageSize;//每页的条数
     private Integer pageIndex;//当前页
