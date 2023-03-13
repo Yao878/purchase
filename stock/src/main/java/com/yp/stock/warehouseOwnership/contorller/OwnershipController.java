@@ -1,9 +1,9 @@
 package com.yp.stock.warehouseOwnership.contorller;
 
 import com.yp.stock.utils.ResultVo;
+import com.yp.stock.warehouseOwnership.bean.BigBean;
 import com.yp.stock.warehouseOwnership.bean.Ownership;
-import com.yp.stock.warehouseOwnership.bean.QueryPageVo;
-import com.yp.stock.warehouseOwnership.bean.SecendPageVo;
+import com.yp.stock.warehouseOwnership.bean.ShipVo;
 import com.yp.stock.warehouseOwnership.service.OwnershipService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,27 +26,17 @@ public class OwnershipController {
 
     @RequestMapping("/queryFirstPage")
     @ApiOperation(value = "库房归属第一层分页查询")
-    public ResultVo queryFirstPage(@RequestBody QueryPageVo queryPageVo) {
-        return ownershipService.queryFirstPage(queryPageVo);
+    public ResultVo queryFirstPage(@RequestBody ShipVo shipVo) {
+        return ownershipService.queryFirstPage(shipVo);
     }
 
-    @RequestMapping("/querySecondPage")
-    @ApiOperation(value = "库房归属第二层分页查询")
-    public ResultVo querySecondPage(@RequestBody SecendPageVo secendPageVo) {
-        return ownershipService.querySecondPage(secendPageVo);
-    }
 
     @RequestMapping("/querySecondPageByStorehouse")
     @ApiOperation(value = "通过库房条件查询第二层分页查询")
-    public ResultVo querySecondPageByStorehouse(@RequestBody SecendPageVo secendPageVo) {
-        return ownershipService.querySecondPageByStorehouse(secendPageVo);
+    public ResultVo querySecondPageByStorehouse(@RequestBody BigBean bigBean) {
+        return ownershipService.querySecondPageByStorehouse(bigBean);
     }
 
-    @RequestMapping("/updateSituation")
-    @ApiOperation(value = "修改页面选取信息")
-    public ResultVo updateSituation(@RequestBody Ownership ownership) {
-        return ownershipService.updateSituation(ownership);
-    }
 
     @RequestMapping("/addOwnership")
     @ApiOperation(value = "添加库房归属")
@@ -54,5 +44,22 @@ public class OwnershipController {
         return ownershipService.addOwnership(ownership);
     }
 
+    @RequestMapping("/queryBusiness")
+    @ApiOperation(value = "查询库区业务")
+    public ResultVo queryBusiness(@RequestBody String areaCode, String businessCode) {
+        return ownershipService.queryBusiness(areaCode, businessCode);
+    }
+
+    @RequestMapping("/updateStatus")
+    @ApiOperation(value = "修改库区状态")
+    public ResultVo updateStatus(@RequestBody Ownership ownership) {
+        return ownershipService.updateStatus(ownership);
+    }
+
+    @RequestMapping("/update")
+    @ApiOperation(value = "修改库位归属")
+    public ResultVo update(@RequestBody BigBean bigBean) {
+        return ownershipService.update(bigBean);
+    }
 
 }
