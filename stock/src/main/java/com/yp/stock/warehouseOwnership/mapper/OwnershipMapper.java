@@ -16,19 +16,10 @@ import java.util.List;
 @Mapper
 public interface OwnershipMapper {
 
-    void deleteAllOwnershipByCorCode(String corCode);
-
     List<ShipVo> queryFirstPage(ShipVo shipVo);
 
-    List<Area> queryAreaListByStorehouseList(List<StoreHouse> storeHouseList);
-
-    List<Kuwei> queryKuweiListByAreaList(List<Area> areaList);
-
     int addOwnership(Ownership ownership);
-
     List<Area> queryBusiness(String areaCode, String businessCode);
-
-    int updateStatus(Ownership ownership);
 
     List<Kuwei> selectKuweiByLegalPersonId(String legalPersonCode);
 
@@ -43,4 +34,8 @@ public interface OwnershipMapper {
     List<Area> selectAreaByStoreHouseList(List<StoreHouse> storeHouseList);
 
     List<Kuwei> selectKuwei(List<Area> areaList);
+
+    Integer updateCorWarehouse(List<Kuwei> kuweiList);
+
+    int updateStatus(Ownership ownership);
 }

@@ -28,6 +28,28 @@
             </foreach>
         </where>
     </update>
+    <update id = "updateCorWarehouse">
+        update warehouse
+        <set>
+            cor_code = null
+        </set>
+        <where>
+            code not in
+            <foreach collection = "kuweiList" item = "item" open = "(" separator = "," close = ")">
+                #{item.code}
+            </foreach>
+            and cor_code=#{corCode}
+        </where>
+    </update>
+    <update id = "updateStatus">
+        update reservoir_area
+        <set>
+            status = #{status}
+        </set>
+        <where>
+            area_code = #{areaCode}
+        </where>
+    </update>
     <select id = "queryFirstPage" resultMap = "FirstMap">
         select s.code as code,s.name as name,s.remark as remark,
         ra.area_code as storageSectionCode,ra.name as storageSectionName,
@@ -57,57 +79,6 @@
                 and ra.status=#{status}
             </if>
         </where>
-    </select>
-    <select id = "queryAreaListByStorehouseList" resultType = "com.yp.stock.area.bean.Area">
-        select * from reservoir_area where storehouse_code in
-        <foreach collection = "list" item = "item" open = "(" separator = "," close = ")">
-            #{item}
-        </foreach>
-    </select>
-    <select id = "queryKuweiListByAreaList" resultType = "com.yp.stock.kuwei.bean.Kuwei">
-        select * from warehouse where area_code in
-        <foreach collection = "list" item = "item" open = "(" separator = "," close = ")">
-            #{item}
-        </foreach>
-    </select>
-
-    <select id = "updateSituationByStoreCode" resultType = "java.lang.String">
-        select area_code
-        from reservoir_area
-        where
-        <foreach collection = "storeCodeList" item = "storeCode" separator = "or">
-            storehouse_code = #{storeCode}
-        </foreach>
-    </select>
-
-    <select id = "updateSituationByAreaCode" resultType = "java.lang.String">
-        select code
-        from warehouse
-        where
-        <foreach collection = "areaCodeList" item = "areaCode" separator = "or">
-            area_code = #{areaCode}
-        </foreach>
-    </select>
-
-    <select id = "updateStoreSituationByCorCode" resultType = "java.lang.String">
-        select s.code
-        from storehouse as s
-                 left join reservoir_area as r on r.storehouse_code = s.code
-                 left join warehouse as w on w.area_code = r.area_code
-        where cor_code = #{corCode}
-    </select>
-
-    <select id = "updateAreaSituationByCorCode" resultType = "java.lang.String">
-        select r.area_code
-        from reservoir_area as r
-                 left join warehouse as w on w.area_code = r.area_code
-        where cor_code = #{corCode}
-    </select>
-
-    <select id = "updateWareSituationByCorCode" resultType = "java.lang.String">
-        select code
-        from warehouse
-        where cor_code = #{corCode}
     </select>
     <select id = "queryBusiness" resultType = "com.yp.stock.area.bean.Area">
         select b.code, b.name, b.remark, b.status, ra.status
@@ -175,20 +146,5 @@
             </if>
         </where>
     </select>
-
-    <update id = "deleteAllOwnershipByCorCode">
-        update warehouse
-        set cor_code = null
-        where cor_code = #{corCode}
-    </update>
-    <update id = "updateStatus">
-        update reservoir_area
-        <set>
-            status = #{status}
-        </set>
-        <where>
-            area_code = #{areaCode}
-        </where>
-    </update>
 
 </mapper>

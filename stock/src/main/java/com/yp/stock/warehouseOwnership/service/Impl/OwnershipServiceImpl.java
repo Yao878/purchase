@@ -92,7 +92,11 @@ public class OwnershipServiceImpl implements OwnershipService {
 
     @Override
     public ResultVo update(BigBean bigBean) {
-
-        return null;
+        Integer flag = ownershipMapper.updateCorWarehouse(bigBean.getKuweiList());
+        if (flag > 0) {
+            return ResultBuildVo.success("  修改成功" + flag);
+        } else {
+            return ResultBuildVo.error("修改失败");
+        }
     }
 }
